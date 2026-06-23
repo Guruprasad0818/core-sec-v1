@@ -1,0 +1,230 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema#",
+  "definitions": {
+    "BehaviorProfile": {
+      "type": "object",
+      "properties": {
+        "profile_id": {"type": "string", "format": "uuid"},
+        "developer_id": {"type": "string"},
+        "repository_id": {"type": ["string", "null"]},
+        "profile_window_days": {"type": "integer", "minimum": 1},
+        "feature_summary": {
+          "type": "object",
+          "properties": {
+            "mean": {"type": "object", "additionalProperties": {"type": "number"}},
+            "stddev": {"type": "object", "additionalProperties": {"type": "number"}},
+            "skew": {"type": "object", "additionalProperties": {"type": "number"}},
+            "kurtosis": {"type": "object", "additionalProperties": {"type": "number"}},
+            "percentile_50": {"type": "object", "additionalProperties": {"type": "number"}},
+            "percentile_90": {"type": "object", "additionalProperties": {"type": "number"}}
+          },
+          "required": ["mean", "stddev"]
+        },
+        "drift_metrics": {
+          "type": "object",
+          "properties": {
+            "feature_drift_score": {"type": "number"},
+            "identity_drift_score": {"type": "number"},
+            "cadence_drift_score": {"type": "number"},
+            "recent_anomaly_rate": {"type": "number", "minimum": 0, "maximum": 1}
+          },
+          "required": ["feature_drift_score", "identity_drift_score", "cadence_drift_score", "recent_anomaly_rate"]
+        },
+        "baseline_hash": {"type": "string"},
+        "feature_count": {"type": "integer", "minimum": 0},
+        "window_start": {"type": "string", "format": "date-time"},
+        "window_end": {"type": "string", "format": "date-time"},
+        "last_updated_at": {"type": "string", "format": "date-time"},
+        "model_version": {"type": "string"},
+        "tags": {"type": "array", "items": {"type": "string"}},
+        "metadata": {"type": "object", "additionalProperties": true}
+      },
+      "required": ["profile_id", "developer_id", "feature_summary", "drift_metrics", "feature_count", "window_start", "window_end", "last_updated_at"]
+    },
+    "CommitFeatures": {
+      "type": "object",
+      "properties": {
+        "commit_id": {"type": "string"},
+        "repository_id": {"type": "string"},
+        "branch_name": {"type": "string"},
+        "parent_commit_ids": {"type": "array", "items": {"type": "string"}},
+        "developer_id": {"type": "string"},
+        "author_name": {"type": "string"},
+        "author_email": {"type": "string", "format": "email"},
+        "author_date": {"type": "string", "format": "date-time"},
+        "committer_date": {"type": "string", "format": "date-time"},
+        "commit_message": {"type": "string"},
+        "commit_message_features": {
+          "type": "object",
+          "properties": {
+            "message_length": {"type": "integer"},
+            "sentence_count": {"type": "integer"},
+            "issue_reference_count": {"type": "integer"},
+            "has_coauthor": {"type": "boolean"},
+            "keyword_anomaly_score": {"type": "number"},
+            "subject_entropy": {"type": "number"}
+          },
+          "required": ["message_length", "sentence_count", "issue_reference_count"]
+        },
+        "diff_features": {
+          "type": "object",
+          "properties": {
+            "files_changed_count": {"type": "integer"},
+            "lines_added": {"type": "integer"},
+            "lines_deleted": {"type": "integer"},
+            "net_line_delta": {"type": "integer"},
+            "binary_file_change_count": {"type": "integer"},
+            "rename_count": {"type": "integer"},
+            "hunk_count": {"type": "integer"},
+            "max_hunk_size": {"type": "integer"},
+            "avg_hunk_size": {"type": "number"}
+          },
+          "required": ["files_changed_count", "lines_added", "lines_deleted"]
+        },
+        "code_metrics": {
+          "type": "object",
+          "properties": {
+            "cyclomatic_complexity_delta": {"type": "number"},
+            "comment_to_code_ratio_delta": {"type": "number"},
+            "todo_fixme_delta": {"type": "integer"},
+            "test_file_change_ratio": {"type": "number"},
+            "documentation_change_count": {"type": "integer"}
+          }
+        },
+        "time_features": {
+          "type": "object",
+          "properties": {
+            "commit_day_of_week": {"type": "integer", "minimum": 0, "maximum": 6},
+            "commit_hour_local": {"type": "integer", "minimum": 0, "maximum": 23},
+            "time_since_last_commit_seconds": {"type": ["integer", "null"]},
+            "weekend_commit": {"type": "boolean"},
+            "holiday_commit": {"type": "boolean"}
+          },
+          "required": ["commit_day_of_week", "commit_hour_local"]
+        },
+        "repository_features": {
+          "type": "object",
+          "properties": {
+            "branch_distance_from_default": {"type": "integer"},
+            "merge_base_distance_commits": {"type": "integer"},
+            "open_pr_count": {"type": "integer"},
+            "recent_build_failure_rate": {"type": "number"}
+          }
+        },
+        "developer_features": {
+          "type": "object",
+          "properties": {
+            "developer_experience_days": {"type": "integer"},
+            "prior_anomaly_count": {"type": "integer"},
+            "prior_anomaly_rate": {"type": "number"}
+          }
+        },
+        "language_features": {
+          "type": "object",
+          "properties": {
+            "primary_language": {"type": "string"},
+            "language_mix_entropy": {"type": "number"},
+            "syntax_error_count": {"type": "integer"}
+          }
+        },
+        "tooling_features": {
+          "type": "object",
+          "properties": {
+            "git_client_version": {"type": "string"},
+            "formatter_used": {"type": "boolean"},
+            "precommit_toolchain_present": {"type": "boolean"},
+            "hook_bypass_flag": {"type": "boolean"}
+          }
+        },
+        "feature_vector": {"type": "object", "additionalProperties": {"type": "number"}},
+        "raw_diff": {"type": ["string", "null"]},
+        "metadata": {"type": "object", "additionalProperties": true},
+        "created_at": {"type": "string", "format": "date-time"}
+      },
+      "required": ["commit_id", "repository_id", "developer_id", "author_date", "committer_date", "commit_message", "feature_vector", "created_at"]
+    },
+    "DeveloperBaseline": {
+      "type": "object",
+      "properties": {
+        "baseline_id": {"type": "string", "format": "uuid"},
+        "developer_id": {"type": "string"},
+        "repository_id": {"type": ["string", "null"]},
+        "baseline_window_days": {"type": "integer", "minimum": 1},
+        "feature_statistics": {
+          "type": "object",
+          "properties": {
+            "mean": {"type": "object", "additionalProperties": {"type": "number"}},
+            "stddev": {"type": "object", "additionalProperties": {"type": "number"}},
+            "min": {"type": "object", "additionalProperties": {"type": "number"}},
+            "max": {"type": "object", "additionalProperties": {"type": "number"}},
+            "median": {"type": "object", "additionalProperties": {"type": "number"}}
+          },
+          "required": ["mean", "stddev", "min", "max"]
+        },
+        "thresholds": {
+          "type": "object",
+          "properties": {
+            "zscore_threshold": {"type": "number"},
+            "score_threshold": {"type": "number"},
+            "probability_threshold": {"type": "number"},
+            "confidence_threshold": {"type": "number"}
+          },
+          "required": ["zscore_threshold", "score_threshold"]
+        },
+        "policy_flags": {
+          "type": "object",
+          "properties": {
+            "block_push_on_high_risk": {"type": "boolean"},
+            "require_manual_review_on_medium_risk": {"type": "boolean"},
+            "allow_offline_mode": {"type": "boolean"}
+          }
+        },
+        "evaluation_state": {
+          "type": "object",
+          "properties": {
+            "last_evaluated_at": {"type": "string", "format": "date-time"},
+            "last_score": {"type": "number"},
+            "baseline_age_days": {"type": "integer"}
+          },
+          "required": ["last_evaluated_at", "last_score"]
+        },
+        "metadata": {"type": "object", "additionalProperties": true}
+      },
+      "required": ["baseline_id", "developer_id", "baseline_window_days", "feature_statistics", "thresholds", "evaluation_state"]
+    },
+    "AnomalyEvent": {
+      "type": "object",
+      "properties": {
+        "event_id": {"type": "string", "format": "uuid"},
+        "commit_id": {"type": "string"},
+        "repository_id": {"type": "string"},
+        "developer_id": {"type": "string"},
+        "detected_at": {"type": "string", "format": "date-time"},
+        "stage": {"type": "string", "enum": ["pre-commit", "commit-msg", "pre-push", "server-pre-receive", "server-post-receive", "ci", "audit"]},
+        "anomaly_score": {"type": "number"},
+        "anomaly_label": {"type": "string"},
+        "severity": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+        "detection_reason": {"type": "string"},
+        "feature_contributions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "feature_name": {"type": "string"},
+              "feature_value": {"type": ["number", "string", "boolean", "null"]},
+              "contribution_score": {"type": "number"},
+              "domain": {"type": "string"}
+            },
+            "required": ["feature_name", "contribution_score", "domain"]
+          }
+        },
+        "actions": {"type": "array", "items": {"type": "string"}},
+        "policy_snapshot": {"type": "object", "additionalProperties": true},
+        "model_version": {"type": "string"},
+        "review_ticket_id": {"type": ["string", "null"]},
+        "metadata": {"type": "object", "additionalProperties": true}
+      },
+      "required": ["event_id", "commit_id", "repository_id", "developer_id", "detected_at", "stage", "anomaly_score", "severity", "detection_reason"]
+    }
+  }
+}

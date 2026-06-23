@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: telemetry-collector
+  namespace: production-guardian
+spec:
+  selector:
+    matchLabels:
+      app: telemetry-collector
+  template:
+    metadata:
+      labels:
+        app: telemetry-collector
+    spec:
+      serviceAccountName: production-guardian-sa
+      hostNetwork: true
+      hostPID: true
+      containers:
+        - name: telemetry-agent
+          image: ghcr.io/cbad/prod-guardian-telemetry-agent:latest
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: bpf
+              mountPath: /sys/fs/bpf
+            - name: var-log
+              mountPath: /var/log
+      volumes:
+        - name: bpf
+          hostPath:
+            path: /sys/fs/bpf
+        - name: var-log
+          hostPath:
+            path: /var/log

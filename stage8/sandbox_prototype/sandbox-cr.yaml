@@ -1,0 +1,9 @@
+apiVersion: cbad.example.com/v1
+kind: Sandbox
+metadata:
+  name: sandbox-001
+spec:
+  mode: namespace
+  templateRef: git::ssh://repo/sandbox-templates.git//orders-service
+  ttl: 4h
+  dataSeed: seed-manifest-001

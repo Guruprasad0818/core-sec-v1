@@ -1,0 +1,107 @@
+{
+  "collections": [
+    {
+      "name": "behavior_profiles",
+      "schema": {
+        "bsonType": "object",
+        "required": ["profile_id", "developer_id", "feature_summary", "drift_metrics", "feature_count", "window_start", "window_end", "last_updated_at"],
+        "properties": {
+          "profile_id": {"bsonType": "binData"},
+          "developer_id": {"bsonType": "string"},
+          "repository_id": {"bsonType": ["string", "null"]},
+          "profile_window_days": {"bsonType": "int", "minimum": 1},
+          "feature_summary": {"bsonType": "object"},
+          "drift_metrics": {"bsonType": "object"},
+          "baseline_hash": {"bsonType": "string"},
+          "feature_count": {"bsonType": "int"},
+          "window_start": {"bsonType": "date"},
+          "window_end": {"bsonType": "date"},
+          "last_updated_at": {"bsonType": "date"},
+          "model_version": {"bsonType": "string"},
+          "tags": {"bsonType": "array", "items": {"bsonType": "string"}},
+          "metadata": {"bsonType": "object"}
+        }
+      }
+    },
+    {
+      "name": "commit_features",
+      "schema": {
+        "bsonType": "object",
+        "required": ["commit_id", "repository_id", "developer_id", "author_date", "committer_date", "commit_message", "feature_vector", "created_at"],
+        "properties": {
+          "commit_id": {"bsonType": "string"},
+          "repository_id": {"bsonType": "string"},
+          "branch_name": {"bsonType": "string"},
+          "parent_commit_ids": {"bsonType": "array", "items": {"bsonType": "string"}},
+          "developer_id": {"bsonType": "string"},
+          "author_name": {"bsonType": "string"},
+          "author_email": {"bsonType": "string"},
+          "author_date": {"bsonType": "date"},
+          "committer_date": {"bsonType": "date"},
+          "commit_message": {"bsonType": "string"},
+          "commit_message_features": {"bsonType": "object"},
+          "diff_features": {"bsonType": "object"},
+          "code_metrics": {"bsonType": "object"},
+          "time_features": {"bsonType": "object"},
+          "repository_features": {"bsonType": "object"},
+          "developer_features": {"bsonType": "object"},
+          "language_features": {"bsonType": "object"},
+          "tooling_features": {"bsonType": "object"},
+          "feature_vector": {"bsonType": "object"},
+          "raw_diff": {"bsonType": ["string", "null"]},
+          "metadata": {"bsonType": "object"},
+          "created_at": {"bsonType": "date"},
+          "model_version": {"bsonType": "string"},
+          "anomaly_score": {"bsonType": ["double", "int", "decimal"]},
+          "anomaly_label": {"bsonType": "string"},
+          "feature_source": {"bsonType": "string"}
+        }
+      }
+    },
+    {
+      "name": "developer_baselines",
+      "schema": {
+        "bsonType": "object",
+        "required": ["baseline_id", "developer_id", "baseline_window_days", "feature_statistics", "thresholds", "evaluation_state"],
+        "properties": {
+          "baseline_id": {"bsonType": "binData"},
+          "developer_id": {"bsonType": "string"},
+          "repository_id": {"bsonType": ["string", "null"]},
+          "baseline_window_days": {"bsonType": "int", "minimum": 1},
+          "feature_statistics": {"bsonType": "object"},
+          "thresholds": {"bsonType": "object"},
+          "policy_flags": {"bsonType": "object"},
+          "evaluation_state": {"bsonType": "object"},
+          "metadata": {"bsonType": "object"},
+          "created_at": {"bsonType": "date"},
+          "updated_at": {"bsonType": "date"}
+        }
+      }
+    },
+    {
+      "name": "anomaly_events",
+      "schema": {
+        "bsonType": "object",
+        "required": ["event_id", "commit_id", "repository_id", "developer_id", "detected_at", "stage", "anomaly_score", "severity", "detection_reason"],
+        "properties": {
+          "event_id": {"bsonType": "binData"},
+          "commit_id": {"bsonType": "string"},
+          "repository_id": {"bsonType": "string"},
+          "developer_id": {"bsonType": "string"},
+          "detected_at": {"bsonType": "date"},
+          "stage": {"bsonType": "string"},
+          "anomaly_score": {"bsonType": "double"},
+          "anomaly_label": {"bsonType": "string"},
+          "severity": {"bsonType": "string"},
+          "detection_reason": {"bsonType": "string"},
+          "feature_contributions": {"bsonType": "array"},
+          "actions": {"bsonType": "array", "items": {"bsonType": "string"}},
+          "policy_snapshot": {"bsonType": "object"},
+          "model_version": {"bsonType": "string"},
+          "review_ticket_id": {"bsonType": ["string", "null"]},
+          "metadata": {"bsonType": "object"}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evidence-archiver
+  namespace: production-guardian
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evidence-archiver
+  template:
+    metadata:
+      labels:
+        app: evidence-archiver
+    spec:
+      serviceAccountName: production-guardian-sa
+      containers:
+        - name: archiver
+          image: ghcr.io/cbad/prod-guardian-evidence-archiver:latest
+          env:
+            - name: WORM_BUCKET
+              value: "prod-guardian-evidence"
+            - name: WORM_REGION
+              value: "us-east-1"
+            - name: WORM_MODE
+              value: "immutable"
+          volumeMounts:
+            - name: archive-config
+              mountPath: /etc/archiver
+      volumes:
+        - name: archive-config
+          configMap:
+            name: evidence-archiver-config

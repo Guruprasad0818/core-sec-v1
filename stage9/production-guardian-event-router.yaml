@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-router
+  namespace: production-guardian
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: event-router
+  template:
+    metadata:
+      labels:
+        app: event-router
+    spec:
+      serviceAccountName: production-guardian-sa
+      containers:
+        - name: event-router
+          image: ghcr.io/cbad/prod-guardian-event-router:latest
+          env:
+            - name: EVENT_BUS_URL
+              value: "https://event-bus.production.svc.cluster.local"
+            - name: WORM_ARCHIVE_ENDPOINT
+              value: "https://worm-storage.production.svc.cluster.local"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
