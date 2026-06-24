@@ -1,0 +1,21 @@
+# Pinned to whatever pip actually resolves when fastapi/uvicorn/pydantic are
+# installed alongside semgrep in the same environment - semgrep's mcp
+# dependency requires pydantic>=2.11.0 and uvicorn>=0.31.1, which conflict
+# with the original (pre-semgrep) exact pins below. These versions are the
+# ones this codebase has actually been run and tested against.
+fastapi==0.138.0
+uvicorn[standard]==0.49.0
+pydantic==2.13.4
+GitPython==3.1.50
+semgrep==1.167.0
+
+# Transitive requirements of the stage1..stage9 engines that core.ingestion
+# imports (cve_predictor/predict_risk use xgboost+numpy; slsa_attestor and
+# cosign_wrapper/k8s_admission_validator use cryptography).
+numpy==2.4.6
+xgboost==3.2.0
+cryptography==49.0.0
+
+# Stage 6's runtime monitor (server/runtime_monitor.py) - live host process/
+# file/network telemetry, cross-platform (Windows dev box + Linux container).
+psutil==7.2.2

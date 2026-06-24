@@ -1,0 +1,57 @@
+# Decoupled FastAPI + Next.js stack for the CBAD pipeline dashboard.
+# (dashboard/docker-compose.yml still runs the original Streamlit app
+# standalone, if you need it - this file replaces it for day-to-day use.)
+#
+# Service names matter here: the frontend's server-side code reaches the
+# backend at http://backend:8000, which only resolves because the service
+# below is literally named "backend" - Docker's internal DNS resolves
+# service names, not container names or image tags.
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    image: cbad-backend:latest
+    container_name: cbad-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mandatory: mounts the host's entire repo root read-write into the
+      # container's /app, so GitPython (Stage 1) and Semgrep (Stage 2/3/4)
+      # see the host laptop's live .git history and working tree in
+      # real time - no image rebuild needed after editing any stage's code.
+      - ./:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CBAD_CORS_ORIGINS=http://localhost:3000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: cbad-frontend:latest
+    container_name: cbad-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      # Bind-mount the frontend source so `next dev` (running inside the
+      # container) hot-reloads on host-side edits without a rebuild.
+      # The two anonymous volumes below deliberately shadow the bind mount
+      # for node_modules/.next - those were built inside the Linux container
+      # and must not be overwritten by the host's (likely Windows) copies.
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_API_BASE=http://localhost:8000
+      - INTERNAL_API_BASE=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

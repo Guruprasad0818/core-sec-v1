@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# frontend/
+node_modules/
+.next/
+out/
+
+# Environments & Secrets
+.env
+.env*.local
+
+# misc
+.DS_Store
+
+# generated at runtime - server/compliance_engine.py's audit trail
+server/logs/

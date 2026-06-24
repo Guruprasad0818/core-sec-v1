@@ -1,0 +1,17 @@
+services:
+  dashboard:
+    build:
+      context: ..
+      dockerfile: dashboard/Dockerfile
+    image: cbad-dashboard:latest
+    container_name: cbad-dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      # Mount the live repo read-write so the dashboard always reflects the
+      # latest pipeline artifacts (audit logs, SBOMs, feature payloads, .git
+      # state for the Stage 1 live collector) without rebuilding the image.
+      - ..:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
